@@ -1,0 +1,6 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/1080p60/partial_movie_files/Animations/3977891868_2268332985_631829896.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/1080p60/partial_movie_files/Animations/3977891868_1768817139_4131132508.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/1080p60/partial_movie_files/Animations/2852726489_2919340033_1848823727.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/1080p60/partial_movie_files/Animations/2852726489_2610271361_1589107054.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/1080p60/partial_movie_files/Animations/2852726489_784179552_4064245595.mp4'

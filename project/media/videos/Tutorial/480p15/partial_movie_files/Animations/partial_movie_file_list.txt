@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/1185818338_2268332985_631829896.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/1185818338_2026054236_4131132508.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/624642324_2919340033_1720544811.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/624642324_2506441914_1021090198.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/624642324_784179552_2068595415.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/624642324_784179552_1529169132.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/624642324_2919340033_3223496351.mp4'
+file 'file:C:/Users/denis/OneDrive/Documents/SetOfAllSets/DEMAT/GeometriaComputacional/project/media/videos/Tutorial/480p15/partial_movie_files/Animations/624642324_784179552_887323840.mp4'
