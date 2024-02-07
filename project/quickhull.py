@@ -3,41 +3,30 @@
 import numpy as np
 from manim import *
 
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-def border_points_x(points):
-    max_x = points[0].x
-    min_x = points[0].x
-
-    for p in points:
-        if p.x < min_x:
-            min_x = p.x
-        elif p.x > max_x:
-            max_x = p.x
-    return min_x, max_x
 
 def order(p):
     return p[0], p[1]
     
 def vec_2points(p1, p2):
-    return (p2.x - p1.x, p2.y - p1.y)
+    return (p2[0] - p1[0], p2[1] - p1[1])
 
 def cross_product(vec1, vec2):
     return vec1[0] * vec2[1] - vec1[1] * vec2[0]
-    
-def which_side(p1, p2, p3):
+
+def lineDist(p1, p2, p):
+    return abs((p[1] - p1[1]) * (p2[0] - p1[0]) -
+            (p2[1] - p1[1]) * (p[0] - p1[0]))
+ 
+def which_side(p1, p2, p):
     vec1 = vec_2points(p1, p2)
-    vec2 = vec_2points(p1, p3)
+    vec2 = vec_2points(p1, p)
     cross_p = cross_product(vec1, vec2)
     if cross_p > 0:
-        return 1 #Right
+        return 1 # Right
     elif cross_p < 0:
-        return -1 #Left
+        return -1 # Left
     else: 
-        return 0 #On the line
+        return 0 # On the line
 
 
 class Basic_Animations(Scene):
@@ -58,10 +47,10 @@ class Basic_Animations(Scene):
     def join_points(self, p1, p2):
         line = Line(p1, p2)
         self.play(Create(line, run_time=1.0))
-        self.wait(2)
+        self.wait(1)
         return line
 
-    def color_points(self, point, color):
+    def color_point(self, point, color):
         point.set_color(color)
         self.wait(0.5)
     
@@ -77,18 +66,110 @@ class Basic_Animations(Scene):
     
     def highlight_point(self, point, color):
         point.set_color(color)
-        self.wait(2)
+        self.wait(1)
         point.set_color("WHITE")
         self.wait(1)
+    
+    def order_points(self, points):
+        #returns an array of the order of the points, not the array ordered
+        return sorted(range(len(points)), key=lambda i: order(points[i].get_center()))
 
+    # Devuelve indices de los puntos que pertenecen a la izqueirda y derecha de la linea
+    # formada por p1 y p2
+    def div_sides(self, p1, p2, points):
+        left = []
+        right = []
+        for i in range(len(points)):
+            p = points[i].get_center()
+            side = which_side(p1.get_center(), p2.get_center(), p)
+            if  side == 1:
+                left.append(i)
+            if  side == -1:
+                right.append(i)
+        return left, right
+
+    # Side es el cnojunto de indices de puntos que estan en cierto lado de la recta
+    # formada por p1 y p2
+    def lejano(self, p1, p2, points, side):
+        max_d = 0.0
+        ind = -1
+        for i in range(len(side)):
+            l_d = lineDist(p1.get_center(), p2.get_center(), points[side[i]].get_center())
+            if l_d > max_d:
+                max_d = l_d
+                ind = side[i]
+        return ind
+    
+    def subset(self, points, side):
+        sub = []
+        for i in range(len(side)):
+            sub.append(points[side[i]])
+        return sub
+
+    def add_to_qh(self, quick_h, p1, p2, p):
+        # Encuentra los índices de los elementos en la lista
+        ind1 = quick_h.index(p1)
+        ind2 = quick_h.index(p2)
+
+        if ind2 > ind1:
+            quick_h.insert(ind1, p)
+        else:
+            quick_h.insert(ind2, p)
+
+        return quick_h
+    
+    def mark_shape(self, q_h):
+        return
 
 class Animation(Basic_Animations):
     def construct(self):
         # In this function you do all the functions used for the final animation
         points = self.construct_randpoints()
-        p_order = sorted(range(len(points)), key=lambda i: order(points[i].get_center()))
-        for i in range(len(p_order)):
-            self.color_points(points[p_order[i]], "RED")
+        p_order = self.order_points(points)
+
+        p1 = points[p_order[0]]
+        p2 = points[p_order[-1]]
+
+        quick_h1 = []
+        quick_h1.append(p1)
+        quick_h1.append(p2)
+
+        quick_h2 = []
+
+
+        self.join_points(p1, p2)
+        l, r = self.div_sides(p1, p2, points)
+
+        self.quickHull(points, p2, p1, l, quick_h1)
+        self.quickHull(points, p1, p2, r, quick_h2)
+
+        quick_h = quick_h1 + quick_h2
+        self.mark_shape(quick_h)
+
+        self.wait(2)
+
+    def quickHull(self, points, p1, p2, side, quick_h):
+        if len(side) == 0:
+            return
+        # Te devuelve el punto ma lejano del conjunto punto del lado side
+        # ide contiene lo indices de points que estan en un lado
+        p_l = self.lejano(p1, p2, points, side)
+        pl = points[p_l]
+        self.highlight_point(pl, "RED")
+        self.join_points(p1, pl)
+        self.join_points(pl, p2)
+
+        # debe agregarse entre p_1 y p_2
+        if len(quick_h) < 2:
+            quick_h.append(pl)
+        else:
+            quick_h = self.add_to_qh(quick_h, p1, p2, pl)
+
+        l, r = self.div_sides(p1, pl, points)
+        self.quickHull(points, p1, pl, r, quick_h)
+        l, r = self.div_sides(pl, p2, points)
+        self.quickHull(points, pl, p2, r, quick_h)
+        
 
 if __name__ == "__main__":
     scene = Animation()
