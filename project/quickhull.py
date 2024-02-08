@@ -56,7 +56,7 @@ class Basic_Animations(Scene):
     
     def color_line(self, line, color):
         line.set_color(color)
-        self.wait(2)
+        self.wait(0.1)
 
     def highlight_line(self, line, color):
         line.set_color(color)
@@ -106,20 +106,36 @@ class Basic_Animations(Scene):
             sub.append(points[side[i]])
         return sub
 
-    def add_to_qh(self, quick_h, p1, p2, p):
+    def add_to_qh(self, q_h, p1, p2, p):
         # Encuentra los índices de los elementos en la lista
-        ind1 = quick_h.index(p1)
-        ind2 = quick_h.index(p2)
+        ind1 = -1
+        ind2 = -1
+        if p1 in q_h:
+            ind1 = q_h.index(p1)
+        if p2 in q_h:
+            ind2 = q_h.index(p2)
+        
+        if ind1 == -1:
+            if ind2 == len(q_h)-1:
+                q_h.append(p)
+            else:
+                q_h.insert(0, p)
+            return q_h
+
+        if ind2 == -1:
+            if ind2 == len(q_h)-1:
+                q_h.append(p)
+            else:
+                q_h.insert(0, p)
+            return q_h
 
         if ind2 > ind1:
-            quick_h.insert(ind1, p)
+            q_h.insert(ind1+1, p)
         else:
-            quick_h.insert(ind2, p)
+            q_h.insert(ind2+1, p)
 
-        return quick_h
+        return q_h
     
-    def mark_shape(self, q_h):
-        return
 
 class Animation(Basic_Animations):
     def construct(self):
@@ -143,12 +159,17 @@ class Animation(Basic_Animations):
         self.quickHull(points, p2, p1, l, quick_h1)
         self.quickHull(points, p1, p2, r, quick_h2)
 
-        quick_h = quick_h1 + quick_h2
-        self.mark_shape(quick_h)
+        quick_h = quick_h2 + quick_h1
+
+        for i in range(len(quick_h)-1):
+            l = self.join_points(quick_h[i], quick_h[i+1])
+            self.color_line(l, "RED")
+        l = self.join_points(quick_h[-1], quick_h[0])
+        self.color_line(l, "RED")
 
         self.wait(2)
 
-    def quickHull(self, points, p1, p2, side, quick_h):
+    def quickHull(self, points, p1, p2, side, q_h):
         if len(side) == 0:
             return
         # Te devuelve el punto ma lejano del conjunto punto del lado side
@@ -160,15 +181,15 @@ class Animation(Basic_Animations):
         self.join_points(pl, p2)
 
         # debe agregarse entre p_1 y p_2
-        if len(quick_h) < 2:
-            quick_h.append(pl)
+        if len(q_h) < 2:
+            q_h.append(pl)
         else:
-            quick_h = self.add_to_qh(quick_h, p1, p2, pl)
+            self.add_to_qh(q_h, p1, p2, pl)
 
         l, r = self.div_sides(p1, pl, points)
-        self.quickHull(points, p1, pl, r, quick_h)
+        self.quickHull(points, p1, pl, r, q_h)
         l, r = self.div_sides(pl, p2, points)
-        self.quickHull(points, pl, p2, r, quick_h)
+        self.quickHull(points, pl, p2, r, q_h)
         
 
 if __name__ == "__main__":
