@@ -63,6 +63,7 @@ class Basic_Animations(Scene):
         #returns an array of the order of the points, not the array ordered
         return sorted(range(len(points)), key=lambda i: order(points[i].get_center()))
     
+    # Ve de que lado esta el punto p, respecto a la recta formada por p1, p2
     def which_side(self, p1, p2, p):
         vec1 = vec_2points(p1.get_center(), p2.get_center())
         vec2 = vec_2points(p1.get_center(), p.get_center())
@@ -145,31 +146,65 @@ class Basic_Animations(Scene):
         return lines, points
 
     def intersect_twolines(self, lines, points, i, j):
+        # Los 4 puntos que conforman a los dos segmentos de recta
         p1 = points[2*i]
         p2 = points[2*i + 1]
         p3 = points[2*j]
         p4 = points[2*j + 1]
 
+        # Vemos de que lado estan los puntos respecto al otro segmento de recta
+        # Si alguno es 0 significa que esta en la linea
         s1 = self.which_side(p1, p2, p3)
+        if s1 == 0:
+            return 1, p3
         s2 = self.which_side(p1, p2, p4)
+        if s2 == 0:
+            return 1, p4
         s3 = self.which_side(p3, p4, p1)
+        if s3 == 0:
+            return 1, p1
         s4 = self.which_side(p3, p4, p2)
+        if s4 == 0:
+            return 1, p2
 
-        self.color_point(p1, "RED")
-        self.color_point(p2, "RED")
-        self.color_point(p3, "RED")
-        self.color_point(p4, "RED")
-
-        if s1 == 0 or s2 == 0 or s3 == 0 or s4 == 0:
-            return 1
+        # Si estan del mismo lado significa que no se cruzan
         if s1 == s2:
-            return 0
+            return 0, None
         if s3 == s4:
-            return 0
-        
-        self.color_line(lines[i], "BLUE")
-        self.color_line(lines[j], "BLUE")
-        return 1
+            return 0, None
+
+        # Calcular las pendientes
+        p1 = p1.get_center()
+        p2 = p2.get_center()
+        p3 = p3.get_center()
+        p4 = p4.get_center()
+        m1 = (p2[1] - p1[1]) / (p2[0] - p1[0]) if p2[0] - p1[0] != 0 else float('inf')
+        m2 = (p4[1] - p3[1]) / (p4[0] - p3[0]) if p4[0] - p3[0] != 0 else float('inf')
+        if m1 != float('inf') and m2 != float('inf'):
+            # Calcular intercecciones de y
+            b1 = p1[1] - m1 * p1[0]
+            b2 = p3[1] - m2 * p3[0]
+
+            # Calcular el punto de intersección
+            x = (b2 - b1) / (m1 - m2)
+            y = m1 * x + b1
+        else:
+            # Manejar casos donde una de las líneas es vertical
+            if m1 == float('inf'):
+                x = p1[0]
+                y = m2 * x + (p3[1] - m2 * p3[0])
+            else:
+                x = p3[0]
+                y = m1 * x + (p1[1] - m1 * p1[0])
+
+        # Agregamos el punto a la animacion en caso de que cruce
+        dot1 = Dot(point=np.array([x, y, 0]))
+        self.add(dot1)
+        dot1.set_color("RED")
+        self.wait(0.5)
+
+        # Al ser diferentes se curzan y debemos ver en donde
+        return 1, [x, y]
 
 class Animation(Basic_Animations):
     def construct(self):
