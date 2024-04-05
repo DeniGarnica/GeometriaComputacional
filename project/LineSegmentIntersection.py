@@ -1,25 +1,32 @@
 # Entrar desde la terminal a la carpeta 
 # python3 -m manim -pql LineSegmentIntersection.py main Animation
 import numpy as np
+import bisect
+import random
 from manim import *
 
-
-def order(p):
+def order_x(p):
     return p[0], p[1]
-    
+
+def order_y(p):
+    return p[1], p[0]
+
 def vec_2points(p1, p2):
     return (p2[0] - p1[0], p2[1] - p1[1])
 
 def cross_product(vec1, vec2):
     return vec1[0] * vec2[1] - vec1[1] * vec2[0]
 
+# calcula la distancia del punto p a la recta formada por p1 y p2
 def lineDist(p1, p2, p):
     return abs((p[1] - p1[1]) * (p2[0] - p1[0]) -
             (p2[1] - p1[1]) * (p[0] - p1[0]))
 
 
 class Basic_Animations(Scene):
+    # Crea n puntos aleatorios y hace su animacion de aparecerlos en la pantalla
     def construct_randpoints(self, n = 20):
+        np.random.seed(0)
         points = []
         x = 4
         y = 3
@@ -29,39 +36,47 @@ class Basic_Animations(Scene):
             y_r = np.random.uniform(-y, y)
             points.append(Dot(point=np.array([x_r, y_r, 0])))
         group = VGroup(*points)
-        self.play(Create(group, run_time=6.0))
+        self.play(Create(group, run_time=2.0))
         self.wait(1)
         return points
     
+    # Une co una recta los puntos p1 y p2
     def join_points(self, p1, p2):
         line = Line(p1, p2)
         self.play(Create(line, run_time=1.0))
-        self.wait(1)
+        self.wait(0.1)
         return line
 
+    # Cambia de color el punto point al color = color
     def color_point(self, point, color):
         point.set_color(color)
         self.wait(0.5)
     
+    #Cambia de color de la linea al color = color
     def color_line(self, line, color):
         line.set_color(color)
         self.wait(0.1)
 
+    # Resalta una recta con el color = color
     def highlight_line(self, line, color):
         line.set_color(color)
         self.wait(2)
         line.set_color("WHITE")
         self.wait(1)
     
+    # Resalta una punto con el color = color
     def highlight_point(self, point, color):
         point.set_color(color)
         self.wait(1)
         point.set_color("WHITE")
         self.wait(1)
     
-    def order_points(self, points):
-        #returns an array of the order of the points, not the array ordered
-        return sorted(range(len(points)), key=lambda i: order(points[i].get_center()))
+    # Regresa un arreglo del order de los puntos, no los puntos ordenados 
+    def order_points_x(self, points):
+        return sorted(range(len(points)), key=lambda i: order_x(points[i].get_center()))
+    
+    def order_points_y(self, points):
+        return sorted(range(len(points)), key=lambda i: order_y(points[i].get_center()), reverse=True)
     
     # Ve de que lado esta el punto p, respecto a la recta formada por p1, p2
     def which_side(self, p1, p2, p):
@@ -106,6 +121,7 @@ class Basic_Animations(Scene):
             sub.append(points[side[i]])
         return sub
 
+    # Lo agrega al convexhull
     def add_to_ch(self, c_h, p1, p2, p):
         # Encuentra los índices de los elementos en la lista
         ind1 = -1
@@ -136,16 +152,36 @@ class Basic_Animations(Scene):
 
         return c_h
 
+    # Crea n segmentos de recta en posiciones aleatorias
     def random_lines(self, n = 10):
         points = self.construct_randpoints(2*n)
-        lines = []
+        segments = []
         i = 0
         for j in range(n):
-            lines.append(self.join_points(points[i], points[i+1]))
+            # Que el primer punto del segmento tenga mayor coordenada y
+            if points[i].get_center()[1] < points[i+1].get_center()[1]:
+                aux = points[i]
+                points[i] = points[i+1]
+                points[i+1] = aux
+            segments.append(self.join_points(points[i], points[i+1]))
             i = i + 2
-        return lines, points
+        return segments, points
+    
+    '''
+    Este codigo esta diseñado de tal manera que:
+    dado el conjunto de puntos "points",
+    points[i], points[i+1] forman el segmento (i/2)-ésimo
+    además siempre points[i].y >= points[i+1].y
+    
+    Si dos rectas comparten un punto, este se almacena dos veces
+    hay que marcar el no procesarlo dos veces (esto aun no se hace)
+    '''
 
-    def intersect_twolines(self, lines, points, i, j):
+    # Dadas dos rectas, nos dice si estas se intersectan y en que punto
+    # points = conjunto de todos los puntos
+    # i, i + 1 forman a la recta 1
+    # j, j + 1 forman a la recta 2
+    def intersect_twolines(self, points, i, j):
         # Los 4 puntos que conforman a los dos segmentos de recta
         p1 = points[2*i]
         p2 = points[2*i + 1]
@@ -206,15 +242,82 @@ class Basic_Animations(Scene):
         # Al ser diferentes se curzan y debemos ver en donde
         return 1, [x, y]
 
+    # Nos dice si el punto en la posicion i es un upper o lower
+    def upper_point(self, i):
+        if i % 2 == 0:
+            return 1 # devolveremos 1 para upper
+        else:
+            return 0
+    
+    # Nos dice en que segmento se encuentra
+    def which_segment(self, i):
+        return int(i/2)
+
+    # Ordena por el eje y los segmentos
+    def order_segments(self, points):
+        segments = []
+        s = sorted(range(len(points)), key=lambda i: order_y(points[i].get_center()))
+
+        return segments
+    
+    def create_events(self, points):
+        events = []
+
+        order = self.order_points_y(points)
+
+        for i in order:
+            if i % 2 == 0: # Es upper
+                p = points[i].get_center()
+                q = points[i+1].get_center()
+                new_event = Event(p[1], (p, q), 'start', i)
+            else: # Es lower
+                p = points[i-1].get_center()
+                q = points[i].get_center()
+                new_event = Event(q[1], (p, q), 'end', i)
+            events.append(new_event)
+
+        return events
+
+    # La siguiente funcion detecta si hay una interseccion 
+    # despues de los movimientos nuevos
+    #def Detecta_intersecciones()
+    
+    # Ingresamos el conjunto de segmentos S
+    #def Fin_Intersections(S):
+
+class Event:
+    def __init__(self, y, segment, event_type, i):
+        self.y =  y
+        self.segment = segment # Conjunto de dos puntos que forman la recta tipo [[1,1], [2,2]]
+        self.event_type = event_type  # 'start' o 'end'
+        self.i = i
+
+    def __lt__(self, other):
+        if self.y != other.y:
+            return self.y > other.y
+        # Si dos eventos ocurren en el mismo punto,
+        # se da prioridad a los eventos de inicio sobre los eventos de fin.
+        return self.event_type == 'start' and other.event_type == 'end'
+
+
+
+
 class Animation(Basic_Animations):
     def construct(self):
         # In this function you do all the functions used for the final animation
         n = 8
-        lines, points = self.random_lines(n)
+        segments, points = self.random_lines(n)
 
-        for i in range(n):
-            for j in range(i, n):
-                self.intersect_twolines(lines, points, i, j)
+        events = self.create_events(points) 
+
+        for event in events:
+            self.color_point(points[event.i], "BLUE")
+
+
+        #for i in range(n):
+        #    for j in range(i, n):
+        #        self.intersect_twolines(points, i, j)
+        self.wait(4)
 
 if __name__ == "__main__":
     scene = Animation()
