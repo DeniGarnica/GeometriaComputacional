@@ -106,35 +106,35 @@ class Basic_Animations(Scene):
             sub.append(points[side[i]])
         return sub
 
-    def add_to_qh(self, q_h, p1, p2, p):
+    def add_to_ch(self, c_h, p1, p2, p):
         # Encuentra los índices de los elementos en la lista
         ind1 = -1
         ind2 = -1
-        if p1 in q_h:
-            ind1 = q_h.index(p1)
-        if p2 in q_h:
-            ind2 = q_h.index(p2)
+        if p1 in c_h:
+            ind1 = c_h.index(p1)
+        if p2 in c_h:
+            ind2 = c_h.index(p2)
         
         if ind1 == -1:
-            if ind2 == len(q_h)-1:
-                q_h.append(p)
+            if ind2 == len(c_h)-1:
+                c_h.append(p)
             else:
-                q_h.insert(0, p)
-            return q_h
+                c_h.insert(0, p)
+            return c_h
 
         if ind2 == -1:
-            if ind2 == len(q_h)-1:
-                q_h.append(p)
+            if ind2 == len(c_h)-1:
+                c_h.append(p)
             else:
-                q_h.insert(0, p)
-            return q_h
+                c_h.insert(0, p)
+            return c_h
 
         if ind2 > ind1:
-            q_h.insert(ind1+1, p)
+            c_h.insert(ind1+1, p)
         else:
-            q_h.insert(ind2+1, p)
+            c_h.insert(ind2+1, p)
 
-        return q_h
+        return c_h
     
 
 class Animation(Basic_Animations):
@@ -146,30 +146,30 @@ class Animation(Basic_Animations):
         p1 = points[p_order[0]]
         p2 = points[p_order[-1]]
 
-        quick_h1 = []
-        quick_h1.append(p1)
-        quick_h1.append(p2)
+        convex_h1 = []
+        convex_h1.append(p1)
+        convex_h1.append(p2)
 
-        quick_h2 = []
+        convex_h2 = []
 
 
         self.join_points(p1, p2)
         l, r = self.div_sides(p1, p2, points)
 
-        self.quickHull(points, p2, p1, l, quick_h1)
-        self.quickHull(points, p1, p2, r, quick_h2)
+        self.quickHull(points, p2, p1, l, convex_h1)
+        self.quickHull(points, p1, p2, r, convex_h2)
 
-        quick_h = quick_h2 + quick_h1
+        convex_h = convex_h2 + convex_h1
 
-        for i in range(len(quick_h)-1):
-            l = self.join_points(quick_h[i], quick_h[i+1])
+        for i in range(len(convex_h)-1):
+            l = self.join_points(convex_h[i], convex_h[i+1])
             self.color_line(l, "RED")
-        l = self.join_points(quick_h[-1], quick_h[0])
+        l = self.join_points(convex_h[-1], convex_h[0])
         self.color_line(l, "RED")
 
         self.wait(2)
 
-    def quickHull(self, points, p1, p2, side, q_h):
+    def quickHull(self, points, p1, p2, side, c_h):
         if len(side) == 0:
             return
         # Te devuelve el punto ma lejano del conjunto punto del lado side
@@ -181,15 +181,15 @@ class Animation(Basic_Animations):
         self.join_points(pl, p2)
 
         # debe agregarse entre p_1 y p_2
-        if len(q_h) < 2:
-            q_h.append(pl)
+        if len(c_h) < 2:
+            c_h.append(pl)
         else:
-            self.add_to_qh(q_h, p1, p2, pl)
+            self.add_to_ch(c_h, p1, p2, pl)
 
         l, r = self.div_sides(p1, pl, points)
-        self.quickHull(points, p1, pl, r, q_h)
+        self.quickHull(points, p1, pl, r, c_h)
         l, r = self.div_sides(pl, p2, points)
-        self.quickHull(points, pl, p2, r, q_h)
+        self.quickHull(points, pl, p2, r, c_h)
         
 
 if __name__ == "__main__":
