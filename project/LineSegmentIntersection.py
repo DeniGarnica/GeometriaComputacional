@@ -4,6 +4,7 @@ import numpy as np
 import bisect
 import random
 from manim import *
+from Treap import Nodo, Treap
 
 def order_x(p):
     return p[0], p[1]

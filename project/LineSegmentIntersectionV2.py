@@ -7,6 +7,7 @@ from manim import *
 import heapq
 from BasicAnim import Basic_Animations
 import Order_orientation as Oo
+from Treap import Nodo, Treap_segments
 
 
 # Los eventos de la priority queue
@@ -28,8 +29,8 @@ def create_events(points):
     # ordenamos los puntos por eje y para iniciar la cola de prioridad
     order = Oo.order_points_y(points)
 
-# Agregamos los eventos dependiendo si es el inicio o fin de un segmento
-# El segmento i
+    # Agregamos los eventos dependiendo si es el inicio o fin de un segmento
+    # El segmento i
     for i in order:
         if i % 2 == 0: # Es upper
             p = points[i].get_center()
@@ -67,7 +68,7 @@ class Animation(Basic_Animations):
         # Inicializamos los eventos 
         pq_events = create_events(points) 
         # Para 
-        SweepLine = [] # Linea de barrido 
+        SweepLine = Treap_segments() # Linea de barrido 
 
         while pq_events: # Mientras tengamos eventos
             event = heapq.heappop(pq_events)
@@ -76,25 +77,26 @@ class Animation(Basic_Animations):
             if event.event_type == 'start':
                 # Agregamos el segmento a la linea de barrido
                 s = event.segments[0]
-                heapq.heappush(SweepLine, s)
+                p1 = points[s*2] # El inicio de segmento
+                p2 = points[s*2+1] # El fin de segmento
+                SweepLine.insertar(s, p1, p2)
 
                 # Vemos si hay nuevas intersecciones
 
 
                 # Pintamos de rojo los segmentos que estan en la linea de barrido
-                p1 = points[s*2]
-                p2 = points[s*2+1]
                 self.color_line_from_points(p1, p2, "RED")
             
             if event.event_type == 'end':
                 # Quitamos el segmento de la linea de barrido
                 s = event.segments[0]
+                p1 = points[s*2]
+                p2 = points[s*2+1]
 
+                SweepLine.eliminar(s, p2)
                 # Vemos si hay nuevas intersecciones
 
                 # Quitamos el rojo de los segmentos que ya no estan en la linea de barrido
-                p1 = points[s*2]
-                p2 = points[s*2+1]
                 self.color_line_from_points(p1, p2, "WHITE")
 
 
