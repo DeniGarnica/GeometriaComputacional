@@ -113,12 +113,8 @@ class Animation(Basic_Animations):
         #n = 8
         n = 8
         segments, points = self.random_lines(n)
-        for p in points:
-            print(p.get_center())
         # Inicializamos los eventos, que son los inicios y fin de segmentos
         pq_events = create_events(points) 
-        for p in pq_events:
-            print(p[1].segments)
         SweepLine = Treap_segments() # Linea de barrido 
         intersections = []
         checked_segments = set()
@@ -126,8 +122,6 @@ class Animation(Basic_Animations):
         while pq_events: # Mientras tengamos eventos
             event = heapq.heappop(pq_events)[1]
             print("event", event.segments[0], ",", event.event_type)
-            '''for p in pq_events:
-                print(p[0],", ", p[1].segments)'''
             # Mantendremos pintados de azul los puntos que ya procesamos
             self.color_point(points[event.i], "BLUE")
 
@@ -162,7 +156,6 @@ class Animation(Basic_Animations):
                 # Vemos si hay nuevas intersecciones
                 if izq and der:
                     b, p = Oo.intersect_twolines(izq.p1, izq.p2, der.p1, der.p2)
-                    print(b, p)
                     if b:
                         if not is_checked(checked_segments, izq.clave, der.clave):
                             print(f'se detecto intersec entre {izq.clave} y {der.clave}')
@@ -182,12 +175,10 @@ class Animation(Basic_Animations):
                 # Quitamos el rojo de los segmentos que ya no estan en la linea de barrido
                 self.color_line_from_points(p1, p2, "WHITE") 
             if event.event_type == 'intersecction':
-                print(f'{event.segments[0]} inter {event.segments[1]}')
+                print(f'Procesando interseccion {event.segments[0]} con {event.segments[1]}')
                 # Marcamos la interseccion
                 x = event.x
                 y = event.y
-                print("nodos, clave")
-                print(SweepLine.nodos_por_clave)
                 dot1 = Dot(point=np.array([x, y, 0]))
                 self.add(dot1)
                 dot1.set_color("BLUE") 

@@ -69,12 +69,10 @@ class Treap_segments:
             self._eliminar(nodo_a_eliminar)
             if clave in self.nodos_por_clave:
                 del self.nodos_por_clave[clave]  # Eliminar el nodo del diccionario
-            print(self.nodos_por_clave)
         
 
     def _eliminar(self, nodo):
         # Eliminar un nodo con 0 o 1 hijo es directo: reemplazarlo con su hijo (si lo tiene)
-        print("nclav", nodo.clave)
         if not nodo.izquierda or not nodo.derecha:
             hijo = nodo.izquierda if nodo.izquierda else nodo.derecha
             if nodo == self.raiz: # Si es la raiz
